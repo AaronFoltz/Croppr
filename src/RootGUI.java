@@ -14,6 +14,10 @@ import java.io.File;
  */
 public final class RootGUI extends JFrame{
 	BufferedImage img;
+	ImageIcon image;
+	int scale = 1;
+	ImageLabel il = new ImageLabel(img);
+
 	// {{{ Gui constructor
     /**
      * 
@@ -23,11 +27,11 @@ public final class RootGUI extends JFrame{
 		final JPanel panel = new JPanel();
 		JButton open = new JButton("Open file");
 		JButton button = new JButton("HI");
-		JSlider slider = new JSlider(0, 100, 50);
+
 
         final JLabel imageLabel = new JLabel();
         final JFileChooser chooser = new JFileChooser();
-		final JScrollPane jsp = new JScrollPane(imageLabel);
+		final JScrollPane jsp = new JScrollPane();
 
 		this.setName("Croppr");
 		this.setDefaultLookAndFeelDecorated(false);
@@ -39,15 +43,7 @@ public final class RootGUI extends JFrame{
 		panel.setPreferredSize(new Dimension(900,650));
 		panel.setBackground(Color.white);
 		
-		slider.setPaintLabels(true);
-		slider.setPaintTicks(true);
-		slider.setSnapToTicks(true);
-		slider.setMinorTickSpacing(2);
-		slider.setMajorTickSpacing(10);
-		slider.setLabelTable(slider.createStandardLabels(10, 0));
-		System.out.println(slider.getSize());
-		//slider.setPreferredSize(slider.getSize());
-		//slider.setMinimumSize(new Dimension(20, 200));
+
 
 		jsp.setPreferredSize(new Dimension(900, 650));
 
@@ -57,27 +53,26 @@ public final class RootGUI extends JFrame{
 		 *		       Layout Management	   		 *
 		 *********************************************/
 		this.setLayout(new GridBagLayout());
-		GridBagConstraints image = new GridBagConstraints();
-		GridBagConstraints buttons = new GridBagConstraints();
+		GridBagConstraints imageConstraint = new GridBagConstraints();
+		GridBagConstraints buttonConstraint = new GridBagConstraints();
 		GridBagConstraints sliderConstraints = new GridBagConstraints();
-		image.gridx = 0;
-		image.gridy = 0;
-		image.gridheight = 2;
-		image.gridwidth = 2;
+		imageConstraint.gridx = 0;
+		imageConstraint.gridy = 0;
+		imageConstraint.gridheight = 2;
+		imageConstraint.gridwidth = 2;
 
-		buttons.gridx = 2;
-		buttons.gridy = 0;
+		buttonConstraint.gridx = 2;
+		buttonConstraint.gridy = 0;
 
 		sliderConstraints.gridx = 0;
 		sliderConstraints.gridy = 2;
 		sliderConstraints.ipadx = 300;
 		sliderConstraints.gridwidth = 2;
 
-		//sliderConstraints.gridwidth = 2;
-		//panel.add(new JLabel(img));
-		this.getContentPane().add(jsp, image);
-		this.getContentPane().add(open, buttons);
-		this.getContentPane().add(slider, sliderConstraints);
+		this.getContentPane().add(jsp, imageConstraint);
+		jsp.setViewportView(il);
+		this.getContentPane().add(open, buttonConstraint);
+		this.getContentPane().add(il.getSlider(), sliderConstraints);
 
 
 		//this.getContentPane().add(jsp, image);
@@ -95,15 +90,16 @@ public final class RootGUI extends JFrame{
 						int returnVal = chooser.showOpenDialog(panel);
 						System.out.println(returnVal);
 						try {
-							//img = new ImageIcon("us.jpg");
                             System.out.println(chooser.getSelectedFile().toString());
 							img = ImageIO.read(new File(chooser.getSelectedFile().toString()));
+							image = new ImageIcon(img);
+							
+							System.out.println(image.getIconHeight() + " " + image.getIconWidth());
+                            imageLabel.setIcon(image);
+							imageLabel.setPreferredSize(new Dimension(25, 100));
+							jsp.setViewportView(imageLabel);
+							jsp.revalidate();
 
-							//img = img.getScaledInstance(900, 600, 1);
-							//getClass().getClassLoader().getResource("myimage.jpeg")
-                            //imageLabel = new JLabel(new ImageIcon(img));
-                            imageLabel.setIcon(new ImageIcon(img));
-							//getContentPane().add(new JScrollPane(imageLabel));
 							validate();
 						}
 						catch (Exception ex) { 
@@ -114,12 +110,16 @@ public final class RootGUI extends JFrame{
 		        });
     }
 
-	public void paint(Graphics g) {
-	    //super.paintComponent(g); 
-	    Graphics2D g2D = (Graphics2D) g;
-	    //AffineTransform affT = g2D.getTransform();
-	    g2D.scale(100,100);
-	    super.paint(g);
-	   // g2D.setTransform(affT);
-	}
+	/*public void paint(Graphics g) {
+		System.out.println("HI");
+        Graphics2D g2 = (Graphics2D)g;
+        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+                            RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+		System.out.println(img.getHeight() + " " + img.getWidth());
+        double x = (img.getWidth() - scale*img.getWidth())/2;
+        double y = (img.getHeight() - scale*img.getHeight())/2;
+        AffineTransform at = AffineTransform.getTranslateInstance(x,y);
+        at.scale(scale, scale);
+        g2.drawRenderedImage(img, at);
+	}*/
 }
